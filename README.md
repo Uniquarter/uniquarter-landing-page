@@ -48,15 +48,16 @@ The site follows the design system wherever the rule is about accessibility or b
 **Taken from the design system as is**
 
 - All colour, spacing, radius, border, motion and z-index values are `--uq-` tokens. `site.css` contains no hex values.
-- The main button is teal, never coral. Buttons and tabs use 8px corners, a 1.5px border and a 44px minimum height.
+- Ordinary buttons follow the design system: teal primary, white-and-teal secondary. Buttons and tabs use 8px corners, a 1.5px border and a 44px minimum height.
 - There is one focus ring everywhere: a 2px teal outline with a white halo, so it shows on teal as well as on white.
 - Links are Primary Teal and underlined, except in the header navigation.
-- Coral, Sky Blue and Gold never carry meaning. Coral appears only as decoration (bullets, the status dot, the number discs) and as the darker accent text token used for eyebrows. Gold is used only for the star ratings in the illustrations.
+- Coral, Sky Blue and Gold never carry meaning. Coral appears as the fill of the main call-to-action button, as decoration (bullets, the status dot, the number discs) and as the darker accent text token used for eyebrows. Gold is used only for the star ratings in the illustrations.
 - The fonts are self-hosted. The site keeps the design system's body text size, eyebrow letter-spacing, skip link, reduced-motion rules and forced-colours rules.
 - The page is pinned to light mode with `data-theme="light"`, so the dark-mode tokens are present but never apply.
 
 **Marketing departures, all in `site.css` as `--lp-` values**
 
+- **Coral call to action.** "Contact" in the header and "Register interest" in the hero are coral with Ink text, so the main action stands out. The design system's buttons are teal. White text on coral would fail contrast (2.81:1); Ink passes at 5.27:1, and 6.72:1 on hover.
 - **Display type.** The design system's largest size is 36px. The hero heading goes up to 56px, section headings to 40px, and sub-headings to 30px. Large headings use slightly tighter letter-spacing (-0.02em).
 - **Long-form line height.** Paragraphs in long sections use 1.6, against the design system's 1.5.
 - **Page width and rhythm.** The content is 1140px wide, with 96px between sections (64px on phones).
@@ -67,7 +68,7 @@ The site follows the design system wherever the rule is about accessibility or b
 
 **Changed while porting, to meet the design system's rules**
 
-- The coral "Register interest" button had white text at 2.81:1 contrast, which fails WCAG AA. It is now the design system's secondary button, white with teal text.
+- The coral "Register interest" button had white text at 2.81:1 contrast, which fails WCAG AA. It now keeps the coral but uses Ink text (see the coral call to action above).
 - The coral focus ring measured 2.73:1 on teal, which fails the 3:1 a focus indicator needs. It is now the design system's ring.
 - Coral borders, coral underlines and Sky Blue text were replaced with teal, white or neutral equivalents.
 - Grey text on the light grey bands failed contrast in two places. It now uses the stronger text colour.

@@ -285,6 +285,17 @@ section {
   background: var(--uq-color-action-secondary-bg-hover);
   color: var(--uq-color-action-secondary-fg);
 }
+/* Marketing addition: the coral call to action. Coral with white text fails
+ * contrast (2.81:1), so the label is Ink: 5.27:1 on coral-400, 6.72:1 on the
+ * lighter hover. The words carry the meaning; coral is only the fill. */
+.btn-accent {
+  background: var(--uq-color-coral-400);
+  color: var(--uq-color-ink);
+}
+.btn-accent:hover {
+  background: var(--uq-color-coral-300);
+  color: var(--uq-color-ink);
+}
 /* On teal: the design system's secondary button, which is white with teal text,
  * and an outline button in white. */
 .on-inverse .btn-secondary {
