@@ -12,7 +12,7 @@ The app lives in a separate private monorepo (`uni-quarter`). This site borrows 
 | `404.html` | Served by GitHub Pages for any address that does not exist |
 | `assets/css/tokens.css` | The design system's tokens, copied in by the sync script. Do not edit by hand |
 | `assets/css/site.css` | Everything else: base rules, layout, components, and the marketing additions |
-| `assets/js/site.js` | The two tab groups. The page works without it: every panel shows, stacked |
+| `assets/js/site.js` | The two tab groups, and the equal-height cards. The page works without it: every panel shows, stacked, and the cards stretch together |
 | `assets/fonts/` | Bricolage Grotesque and Instrument Sans, self-hosted, with their OFL licences |
 | `assets/img/` | App screenshots, and the logo lockups from the brand files |
 | `favicon.ico`, `apple-touch-icon.png`, `og-image.png` | Browser, home-screen and link-preview images |
@@ -30,6 +30,10 @@ python3 -m http.server 8000
 ```
 
 Then go to http://localhost:8000.
+
+## Changing the CSS or JavaScript
+
+The stylesheet and script links in `index.html` and `404.html` end in `?v=` and a date. When you change a CSS or JS file, change that date in both pages, so browsers fetch the new file instead of a saved old one.
 
 ## Keeping the tokens in step with the app
 
@@ -62,7 +66,7 @@ The site follows the design system wherever the rule is about accessibility or b
 - **Long-form line height.** Paragraphs in long sections use 1.6, against the design system's 1.5.
 - **Page width and rhythm.** The content is 1140px wide, with 96px between sections (64px on phones).
 - **Header.** The header is white and 64px tall. The app's header is teal and 56px. A teal header would merge into the teal hero.
-- **Ink band.** The "Fixed boundaries" section sits on Ink, which the app does not use as a surface.
+- **Ink band.** The "Four rules that never change" section sits on Ink, which the app does not use as a surface.
 - **Footer.** The footer uses `teal-800` straight from the colour ramp, a step darker than the hero.
 - **Illustrations.** The four inline illustrations and the icons keep their colours written into the SVG. Every colour in them matches a token value.
 

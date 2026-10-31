@@ -356,15 +356,70 @@ section {
   color: var(--uq-color-text-brand);
   text-decoration: underline;
 }
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--uq-space-6);
+}
+.nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--uq-size-target-touch);
+  height: var(--uq-size-target-touch);
+  margin-right: calc(var(--uq-space-2) * -1);
+  padding: 0;
+  border: 0;
+  border-radius: var(--uq-radius-sm);
+  background: none;
+  color: var(--uq-color-text-strong);
+  cursor: pointer;
+}
+.nav-toggle svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.nav-toggle[aria-expanded="true"] .nav-toggle-open,
+.nav-toggle[aria-expanded="false"] .nav-toggle-close {
+  display: none;
+}
 @media (max-width: 62.5rem) {
   .nav {
-    gap: 0;
-  }
-  .nav a:not(.btn) {
-    display: none;
+    gap: var(--uq-space-3);
   }
   .brand img {
     width: 144px;
+  }
+  /* Without JavaScript the section links stay hidden and Contact carries the header. */
+  .nav-links {
+    display: none;
+  }
+  .js .nav-toggle {
+    display: inline-flex;
+    order: 1;
+  }
+  /* The menu drops below the header bar, full width. */
+  .js .nav-links.open {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    padding: var(--uq-space-2) var(--lp-gutter) var(--uq-space-4);
+    background: var(--uq-color-bg-surface);
+    border-bottom: var(--uq-border-width-hairline) solid var(--uq-color-border-default);
+    box-shadow: var(--uq-shadow-md);
+  }
+  .nav-links a:not(.btn) {
+    font-size: var(--uq-font-size-md);
+  }
+  .nav-links a:not(.btn) + a {
+    border-top: var(--uq-border-width-hairline) solid var(--uq-color-border-default);
   }
 }
 
@@ -471,12 +526,18 @@ section {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--uq-space-6);
-  align-items: start;
 }
 @media (max-width: 56.25rem) {
   .grid3 {
     grid-template-columns: 1fr;
   }
+}
+/* Set by site.js: closed cards hold the tallest closed height, and an open card grows alone. */
+.grid3.held {
+  align-items: start;
+}
+.grid3.held > .xcard:not([open]) {
+  min-height: var(--card-h, 0);
 }
 .xcard {
   overflow: hidden;
@@ -533,7 +594,8 @@ section {
   height: 7px;
   border-right: 2px solid var(--uq-color-text-brand);
   border-bottom: 2px solid var(--uq-color-text-brand);
-  transform: rotate(45deg) translate(-2px, -2px);
+  /* The point of the V sits about 1.8px below the middle of the box that draws it, so lift the box to centre the whole shape in the circle. */
+  transform: translateY(-1.77px) rotate(45deg);
 }
 details[open] > summary .chev {
   transform: rotate(180deg);
@@ -585,14 +647,6 @@ details[open] > summary .chev::before {
   border-radius: var(--uq-radius-full);
   background: var(--uq-color-coral-400); /* decorative bullet */
 }
-.note {
-  max-width: 80ch;
-  margin: var(--uq-space-8) 0 0;
-  padding-top: var(--uq-space-6);
-  border-top: var(--uq-border-width-hairline) solid var(--uq-color-border-default);
-  color: var(--uq-color-text-muted);
-}
-
 /* ---------- Why we exist ---------- */
 .cols2 {
   display: grid;
@@ -624,42 +678,6 @@ details[open] > summary .chev::before {
   font-size: var(--lp-font-size-display-3);
   margin-bottom: 0.5em;
 }
-.qlist {
-  margin: 0 0 var(--uq-space-6);
-  padding: 0;
-  list-style: none;
-}
-.qlist li {
-  display: flex;
-  gap: var(--uq-space-4);
-  margin-bottom: var(--uq-space-5);
-}
-.qlist .q {
-  flex: none;
-  width: 26px;
-  font-family: var(--uq-font-family-display);
-  font-size: var(--uq-font-size-2xl);
-  font-weight: var(--uq-font-weight-bold);
-  line-height: 1;
-  color: var(--uq-color-text-accent);
-}
-.qlist b {
-  display: block;
-  margin-bottom: var(--uq-space-1);
-  font-family: var(--uq-font-family-display);
-  font-size: var(--uq-font-size-lg);
-  line-height: var(--uq-font-line-height-snug);
-  color: var(--uq-color-text-brand);
-}
-.qlist .t {
-  color: var(--uq-color-text-muted);
-}
-.grid2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--uq-space-6);
-  margin-top: var(--uq-space-12);
-}
 .card {
   padding: var(--uq-space-6);
   border: var(--uq-border-width-hairline) solid var(--uq-color-border-default);
@@ -669,7 +687,6 @@ details[open] > summary .chev::before {
 .card h3 {
   margin-bottom: var(--uq-space-1);
 }
-.card .who,
 .founder .role {
   margin: 0 0 var(--uq-space-3);
   font-size: var(--uq-font-size-xs);
@@ -696,12 +713,6 @@ details[open] > summary .chev::before {
   }
   .row {
     margin-top: var(--uq-space-12);
-  }
-}
-@media (max-width: 47.5rem) {
-  .grid2 {
-    grid-template-columns: 1fr;
-    margin-top: var(--uq-space-8);
   }
 }
 
@@ -928,12 +939,7 @@ details[open] > summary .chev::before {
   }
 }
 
-/* ---------- After the keys ---------- */
-.grid4 {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--uq-space-5);
-}
+/* ---------- After move-in ---------- */
 .fcard .ico {
   display: block;
   width: 40px;
@@ -948,16 +954,6 @@ details[open] > summary .chev::before {
   font-size: var(--uq-font-size-sm);
   line-height: var(--lp-line-height-prose);
   color: var(--uq-color-text-muted);
-}
-@media (max-width: 62.5rem) {
-  .grid4 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-@media (max-width: 35rem) {
-  .grid4 {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* ---------- App screens ---------- */
@@ -981,29 +977,6 @@ details[open] > summary .chev::before {
   margin: var(--uq-space-5) auto 0;
   font-size: var(--uq-font-size-sm);
   color: var(--uq-color-text-strong); /* sits on the sunken band, where muted text fails */
-}
-
-/* ---------- Why we are different ---------- */
-.diffs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0 var(--uq-space-12);
-}
-.diff {
-  padding: var(--uq-space-6) 0;
-  border-top: var(--uq-border-width-hairline) solid var(--uq-color-border-default);
-}
-.diff h3 {
-  margin-bottom: var(--uq-space-1);
-}
-.diff p {
-  margin: 0;
-  color: var(--uq-color-text-muted);
-}
-@media (max-width: 56.25rem) {
-  .diffs {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* ---------- Fixed boundaries (ink band) ---------- */
