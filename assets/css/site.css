@@ -539,7 +539,8 @@ section {
   height: 7px;
   border-right: 2px solid var(--uq-color-text-brand);
   border-bottom: 2px solid var(--uq-color-text-brand);
-  transform: rotate(45deg) translate(-2px, -2px);
+  /* The point of the V sits about 1.8px below the middle of the box that draws it, so lift the box to centre the whole shape in the circle. */
+  transform: translateY(-1.77px) rotate(45deg);
 }
 details[open] > summary .chev {
   transform: rotate(180deg);
