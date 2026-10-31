@@ -31,6 +31,10 @@ python3 -m http.server 8000
 
 Then go to http://localhost:8000.
 
+## Changing the CSS or JavaScript
+
+The stylesheet and script links in `index.html` and `404.html` end in `?v=` and a date. When you change a CSS or JS file, change that date in both pages, so browsers fetch the new file instead of a saved old one.
+
 ## Keeping the tokens in step with the app
 
 When colours, type, spacing or any other tokens change in the monorepo, run this from this repo's folder:

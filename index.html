@@ -22,10 +22,10 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/bricolage-grotesque-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/instrument-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/tokens.css">
-<link rel="stylesheet" href="assets/css/site.css">
+<link rel="stylesheet" href="assets/css/tokens.css?v=20261031">
+<link rel="stylesheet" href="assets/css/site.css?v=20261031">
 <script>document.documentElement.classList.add('js')</script>
-<script src="assets/js/site.js" defer></script>
+<script src="assets/js/site.js?v=20261031" defer></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -69,12 +69,21 @@
   <div class="wrap header-inner">
     <a class="brand" href="./"><img src="assets/img/logo/uq-lockup-horizontal.svg" width="823" height="200" alt="UniQuarter home"></a>
     <nav class="nav" aria-label="Primary">
-      <a href="#why">Why we exist</a>
-      <a href="#how">How it works</a>
-      <a href="#screens">The app</a>
-      <a href="#who">Who it is for</a>
-      <a href="#story">Our story</a>
-      <a href="#faq">FAQ</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+          <path class="nav-toggle-open" d="M4 7h16M4 12h16M4 17h16"/>
+          <path class="nav-toggle-close" d="M6 6l12 12M18 6L6 18"/>
+        </svg>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="nav-links" id="nav-links">
+        <a href="#why">Why we exist</a>
+        <a href="#how">How it works</a>
+        <a href="#screens">The app</a>
+        <a href="#who">Who it is for</a>
+        <a href="#story">Our story</a>
+        <a href="#faq">FAQ</a>
+      </div>
       <a class="btn btn-accent" href="#contact">Contact</a>
     </nav>
   </div>

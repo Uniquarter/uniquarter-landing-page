@@ -38,6 +38,37 @@ function tabGroup(selector) {
 tabGroup(".steps .step");
 tabGroup(".tabs .tab");
 
+// The header menu button, shown at narrow widths only. Choosing a link,
+// pressing Escape or clicking outside the header closes the menu.
+function navMenu() {
+  var toggle = document.querySelector(".nav-toggle");
+  if (!toggle) return;
+  var menu = document.getElementById(toggle.getAttribute("aria-controls"));
+  var header = toggle.closest(".site-header");
+
+  function setOpen(open) {
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    menu.classList.toggle("open", open);
+  }
+
+  toggle.addEventListener("click", function () {
+    setOpen(toggle.getAttribute("aria-expanded") !== "true");
+  });
+  menu.addEventListener("click", function (e) {
+    if (e.target.closest("a")) setOpen(false);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape" || toggle.getAttribute("aria-expanded") !== "true") return;
+    setOpen(false);
+    toggle.focus();
+  });
+  document.addEventListener("click", function (e) {
+    if (!header.contains(e.target)) setOpen(false);
+  });
+}
+
+navMenu();
+
 // The three "What UniQuarter is" cards. In a row they hold the height of the
 // tallest closed card, so opening one grows that card alone instead of
 // stretching the other two. Stacked, each card keeps its own height. Without
