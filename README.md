@@ -12,7 +12,7 @@ The app lives in a separate private monorepo (`uni-quarter`). This site borrows 
 | `404.html` | Served by GitHub Pages for any address that does not exist |
 | `assets/css/tokens.css` | The design system's tokens, copied in by the sync script. Do not edit by hand |
 | `assets/css/site.css` | Everything else: base rules, layout, components, and the marketing additions |
-| `assets/js/site.js` | The two tab groups. The page works without it: every panel shows, stacked |
+| `assets/js/site.js` | The two tab groups, and the equal-height cards. The page works without it: every panel shows, stacked, and the cards stretch together |
 | `assets/fonts/` | Bricolage Grotesque and Instrument Sans, self-hosted, with their OFL licences |
 | `assets/img/` | App screenshots, and the logo lockups from the brand files |
 | `favicon.ico`, `apple-touch-icon.png`, `og-image.png` | Browser, home-screen and link-preview images |

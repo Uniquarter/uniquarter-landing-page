@@ -477,6 +477,13 @@ section {
     grid-template-columns: 1fr;
   }
 }
+/* Set by site.js: closed cards hold the tallest closed height, and an open card grows alone. */
+.grid3.held {
+  align-items: start;
+}
+.grid3.held > .xcard:not([open]) {
+  min-height: var(--card-h, 0);
+}
 .xcard {
   overflow: hidden;
   border: var(--uq-border-width-hairline) solid var(--uq-color-border-default);

@@ -37,3 +37,34 @@ function tabGroup(selector) {
 
 tabGroup(".steps .step");
 tabGroup(".tabs .tab");
+
+// The three "What UniQuarter is" cards. In a row they hold the height of the
+// tallest closed card, so opening one grows that card alone instead of
+// stretching the other two. Stacked, each card keeps its own height. Without
+// JavaScript the cards stretch together, so they still match when closed.
+function holdCardHeights() {
+  var cards = Array.prototype.slice.call(document.querySelectorAll(".grid3 > .xcard"));
+  if (cards.length < 2) return;
+  var grid = cards[0].parentNode;
+  var inRow = cards[0].offsetTop === cards[1].offsetTop;
+  grid.classList.toggle("held", inRow);
+  if (!inRow) return;
+
+  var tallest = 0;
+  cards.forEach(function (card) {
+    var border = card.offsetHeight - card.clientHeight;
+    tallest = Math.max(tallest, card.querySelector("summary").offsetHeight + border);
+  });
+  grid.style.setProperty("--card-h", tallest + "px");
+}
+
+var holdTimer;
+function queueHoldCardHeights() {
+  cancelAnimationFrame(holdTimer);
+  holdTimer = requestAnimationFrame(holdCardHeights);
+}
+
+holdCardHeights();
+window.addEventListener("resize", queueHoldCardHeights);
+window.addEventListener("load", queueHoldCardHeights);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(queueHoldCardHeights);
