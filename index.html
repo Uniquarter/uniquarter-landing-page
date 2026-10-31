@@ -22,10 +22,10 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/bricolage-grotesque-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/instrument-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/tokens.css?v=20261031">
-<link rel="stylesheet" href="assets/css/site.css?v=20261031">
+<link rel="stylesheet" href="assets/css/tokens.css?v=20261101">
+<link rel="stylesheet" href="assets/css/site.css?v=20261101">
 <script>document.documentElement.classList.add('js')</script>
-<script src="assets/js/site.js?v=20261031" defer></script>
+<script src="assets/js/site.js?v=20261101" defer></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -343,6 +343,30 @@
            sizes="(max-width:1100px) 92vw, 1000px" width="1800" height="1889" loading="lazy"
            alt="Three UniQuarter app screens: the home screen, a listing with photos and a fit score, and listings near campus with verification badges">
     </picture>
+    <div class="carousel" role="group" aria-roledescription="carousel" aria-label="App screens">
+      <div class="carousel-track">
+        <picture class="phone" role="group" aria-roledescription="slide" aria-label="1 of 3">
+          <source type="image/webp" srcset="assets/img/phone-home.webp">
+          <img src="assets/img/phone-home.png" width="760" height="1452" loading="lazy" draggable="false"
+               alt="The app's home screen: a verified place to live, near your campus">
+        </picture>
+        <picture class="phone" role="group" aria-roledescription="slide" aria-label="2 of 3">
+          <source type="image/webp" srcset="assets/img/app-screen-single.webp">
+          <img src="assets/img/app-screen-single.png" width="760" height="1452" loading="lazy" draggable="false"
+               alt="A listing with its photos, the date they were verified, and how well it fits you">
+        </picture>
+        <picture class="phone" role="group" aria-roledescription="slide" aria-label="3 of 3">
+          <source type="image/webp" srcset="assets/img/phone-hero.webp">
+          <img src="assets/img/phone-hero.png" width="820" height="1566" loading="lazy" draggable="false"
+               alt="Listings near the University of Canterbury, each with a fit score and verification badges">
+        </picture>
+      </div>
+      <div class="carousel-dots">
+        <button type="button" class="carousel-dot"><span class="visually-hidden">Show screen 1 of 3</span></button>
+        <button type="button" class="carousel-dot"><span class="visually-hidden">Show screen 2 of 3</span></button>
+        <button type="button" class="carousel-dot"><span class="visually-hidden">Show screen 3 of 3</span></button>
+      </div>
+    </div>
     <p class="caption">Screens from the build in progress, October 2026. Details will change before the pilot.</p>
   </div>
 </section>
