@@ -471,7 +471,6 @@ section {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--uq-space-6);
-  align-items: start;
 }
 @media (max-width: 56.25rem) {
   .grid3 {
