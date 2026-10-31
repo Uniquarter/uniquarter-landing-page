@@ -735,6 +735,7 @@ details[open] > summary .chev::before {
 }
 .step {
   position: relative;
+  align-self: start; /* a stretched button centres its content, which drops the circle when a neighbour's label wraps */
   padding: 0 0 var(--uq-space-1);
   border: 0;
   border-radius: var(--uq-radius-sm);
