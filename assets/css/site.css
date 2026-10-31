@@ -972,6 +972,69 @@ details[open] > summary .chev::before {
     max-width: 300px;
   }
 }
+/* On phones the three screens become a swipe carousel: the front phone in the
+ * middle, the other two bleeding off the screen edges. The script places each
+ * phone, so without JavaScript the single screen above shows instead. */
+.carousel {
+  display: none;
+}
+@media (max-width: 43.75rem) {
+  .js .showcase > .wrap > picture {
+    display: none;
+  }
+  .js .carousel {
+    display: block;
+    margin: 0 calc(var(--lp-gutter) * -1);
+    overflow: hidden;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .carousel-track {
+    position: relative;
+    height: calc(min(62vw, 300px) * 1.91);
+    cursor: grab;
+  }
+  .carousel .phone {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: min(62vw, 300px);
+    margin-left: calc(min(62vw, 300px) / -2);
+  }
+  .carousel .phone img {
+    max-width: none;
+    pointer-events: none;
+  }
+  .carousel-dots {
+    display: flex;
+    justify-content: center;
+  }
+  .carousel-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--uq-size-target-touch);
+    height: var(--uq-size-target-touch);
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+  .carousel-dot::before {
+    content: "";
+    width: var(--uq-space-2);
+    height: var(--uq-space-2);
+    border-radius: var(--uq-radius-full);
+    background: var(--uq-color-border-strong);
+    transition: width var(--uq-motion-duration-fast) var(--uq-motion-easing-standard);
+  }
+  .carousel-dot[aria-current="true"]::before {
+    width: var(--uq-space-6);
+    background: var(--uq-color-text-brand);
+  }
+}
 .caption {
   max-width: 60ch;
   margin: var(--uq-space-5) auto 0;
