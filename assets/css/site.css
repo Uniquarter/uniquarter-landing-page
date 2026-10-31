@@ -75,6 +75,7 @@
   box-sizing: border-box;
 }
 html {
+  -webkit-tap-highlight-color: transparent; /* no tinted box on tap on phones; focus still shows for keyboards */
   font-family: var(--uq-font-family-body);
   font-size: 100%;
   line-height: var(--uq-font-line-height-normal);
