@@ -22,10 +22,10 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/bricolage-grotesque-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/instrument-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/tokens.css?v=20261101c">
-<link rel="stylesheet" href="assets/css/site.css?v=20261101c">
+<link rel="stylesheet" href="assets/css/tokens.css?v=20261101d">
+<link rel="stylesheet" href="assets/css/site.css?v=20261101d">
 <script>document.documentElement.classList.add('js')</script>
-<script src="assets/js/site.js?v=20261101c" defer></script>
+<script src="assets/js/site.js?v=20261101d" defer></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -84,7 +84,7 @@
         <a href="#story">Our story</a>
         <a href="#faq">FAQ</a>
       </div>
-      <a class="btn btn-accent" href="#contact">Contact</a>
+      <a class="btn btn-accent" href="mailto:alex.moyse@uniquarter.co.nz">Contact</a>
     </nav>
   </div>
 </header>
@@ -345,21 +345,21 @@
     </picture>
     <div class="carousel" role="group" aria-roledescription="carousel" aria-label="App screens">
       <div class="carousel-track">
-        <picture class="phone" role="group" aria-roledescription="slide" aria-label="1 of 3">
+        <div class="phone" role="group" aria-roledescription="slide" aria-label="1 of 3"><picture>
           <source type="image/webp" srcset="assets/img/phone-home.webp">
           <img src="assets/img/phone-home.png" width="760" height="1452" loading="lazy" draggable="false"
                alt="The app's home screen: a verified place to live, near your campus">
-        </picture>
-        <picture class="phone" role="group" aria-roledescription="slide" aria-label="2 of 3">
+        </picture></div>
+        <div class="phone" role="group" aria-roledescription="slide" aria-label="2 of 3"><picture>
           <source type="image/webp" srcset="assets/img/app-screen-single.webp">
           <img src="assets/img/app-screen-single.png" width="760" height="1452" loading="lazy" draggable="false"
                alt="A listing with its photos, the date they were verified, and how well it fits you">
-        </picture>
-        <picture class="phone" role="group" aria-roledescription="slide" aria-label="3 of 3">
+        </picture></div>
+        <div class="phone" role="group" aria-roledescription="slide" aria-label="3 of 3"><picture>
           <source type="image/webp" srcset="assets/img/phone-hero.webp">
           <img src="assets/img/phone-hero.png" width="820" height="1566" loading="lazy" draggable="false"
                alt="Listings near the University of Canterbury, each with a fit score and verification badges">
-        </picture>
+        </picture></div>
       </div>
       <div class="carousel-dots">
         <button type="button" class="carousel-dot"><span class="visually-hidden">Show screen 1 of 3</span></button>
@@ -503,9 +503,80 @@
 <section class="band-sunken">
   <div class="wrap">
     <div class="contact on-inverse" id="contact">
-      <h2>Register your interest</h2>
-      <p>Tell us who you are and what you are looking for, and we will let you know when the platform opens.</p>
-      <p><a class="mailto" href="mailto:alex.moyse@uniquarter.co.nz">alex.moyse@uniquarter.co.nz</a></p>
+      <div class="contact-intro">
+        <h2>Register your interest</h2>
+        <p>Tell us who you are, and we will keep you updated as we progress towards launching the platform.</p>
+        <noscript><p>This form needs JavaScript. You can also register your interest by emailing <a href="mailto:alex.moyse@uniquarter.co.nz">alex.moyse@uniquarter.co.nz</a>.</p></noscript>
+      </div>
+
+      <!-- The form needs JavaScript and is shown by site.js once both settings
+           below are filled in. data-endpoint: the sign-up Worker's address.
+           data-sitekey: the Turnstile widget's site key. See "The sign-up
+           form" in README.md. -->
+      <form class="signup" id="signup" novalidate
+            data-endpoint="https://uniquarter-signup.uniquarter.workers.dev"
+            data-sitekey="0x4AAAAAAFunWplCRobRE_PU">
+        <div class="signup-errors" id="signup-errors" tabindex="-1" hidden>
+          <h3>Please fix the following</h3>
+          <ul></ul>
+        </div>
+
+        <div class="field field-half">
+          <label for="signup-name">First name</label>
+          <input id="signup-name" name="firstName" type="text" autocomplete="given-name" maxlength="50" required aria-describedby="signup-name-error">
+          <p class="field-error" id="signup-name-error" hidden>Enter your first name, without links or symbols</p>
+        </div>
+
+        <div class="field field-half">
+          <label for="signup-email">Email address</label>
+          <input id="signup-email" name="email" type="email" autocomplete="email" spellcheck="false" maxlength="254" required aria-describedby="signup-email-error">
+          <p class="field-error" id="signup-email-error" hidden>Enter an email address like name@example.co.nz</p>
+        </div>
+
+        <fieldset class="field" id="signup-role" aria-describedby="signup-role-error">
+          <legend>I am</legend>
+          <p class="field-error" id="signup-role-error" hidden>Choose the option that fits you best</p>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="role" value="student" id="signup-role-first"> A student</label>
+            <label class="choice"><input type="radio" name="role" value="landlord"> A landlord or property manager</label>
+            <label class="choice"><input type="radio" name="role" value="institution"> From a tertiary institution</label>
+            <label class="choice"><input type="radio" name="role" value="investor"> A potential investor</label>
+            <label class="choice"><input type="radio" name="role" value="other"> Something else</label>
+          </div>
+        </fieldset>
+
+        <div class="field field-half" id="signup-institution-field">
+          <label for="signup-institution">Your institution <span class="optional">(optional)</span></label>
+          <select id="signup-institution" name="institution">
+            <option value="">Choose one</option>
+            <option value="uc">University of Canterbury</option>
+            <option value="ara">Ara Institute of Canterbury</option>
+            <option value="lincoln">Lincoln University</option>
+            <option value="other">Another institution</option>
+          </select>
+        </div>
+
+        <div class="signup-trap" aria-hidden="true">
+          <label for="signup-website">Leave this empty</label>
+          <input id="signup-website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+
+        <!-- The bot check shares a row with the note, so it adds no space
+             while it is invisible, which is most of the time. -->
+        <div class="signup-foot">
+          <div class="signup-challenge" id="signup-challenge"></div>
+          <p class="signup-note">We will only email you about UniQuarter, and you can unsubscribe at any time. <a href="privacy/">Privacy notice</a></p>
+        </div>
+
+        <button class="btn btn-accent btn-lg" type="submit">Register interest</button>
+        <p class="signup-status" id="signup-status" role="status"></p>
+      </form>
+
+      <div class="signup-done" id="signup-done" tabindex="-1" hidden>
+        <h3>Check your email</h3>
+        <p>We have sent a link to <b id="signup-done-email"></b>. Open it within 24 hours and press the button to confirm.</p>
+        <p>If it has not arrived in a few minutes, look in your junk folder.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -518,7 +589,8 @@
       <p>UniQuarter Limited, Christchurch, New Zealand. The platform described on this page is in development. Nothing on this page is an offer or a record of an agreement with any party.</p>
     </div>
     <div class="footer-right">
-      <p><a href="mailto:alex.moyse@uniquarter.co.nz">alex.moyse@uniquarter.co.nz</a><br>uniquarter.co.nz</p>
+      <p><a href="mailto:hello@uniquarter.co.nz">hello@uniquarter.co.nz</a></p>
+      <p><a href="privacy/">Privacy</a></p>
       <p>&copy; 2026 UniQuarter Limited</p>
     </div>
   </div>

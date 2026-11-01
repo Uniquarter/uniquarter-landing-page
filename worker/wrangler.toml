@@ -1,0 +1,32 @@
+# The sign-up Worker. The account ID comes from the CLOUDFLARE_ACCOUNT_ID
+# environment variable (a GitHub secret when the workflow deploys).
+name = "uniquarter-signup"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+workers_dev = true
+
+# Secrets, set by the deploy workflow from GitHub secrets, never written here:
+#   RESEND_API_KEY     full-access Resend key (contacts need full access)
+#   RESEND_SEGMENT_ID  the "Register interest" segment, printed by scripts/setup-resend.mjs
+#   TOKEN_KEY          32 random bytes, base64, for the confirmation links
+#   TURNSTILE_SECRET   the secret half of the Turnstile widget
+# For local runs they go in .dev.vars, which git ignores.
+
+[vars]
+ALLOWED_ORIGINS = "https://uniquarter.co.nz,https://www.uniquarter.co.nz"
+CONFIRM_URL = "https://uniquarter.co.nz/confirm/"
+# Sent from the news. sub-address, so newsletter spam complaints can't hurt the
+# reputation of the main domain that everyday Outlook mail goes out on.
+# Replies go to the shared hello@ mailbox on the main domain.
+FROM = "UniQuarter <hello@news.uniquarter.co.nz>"
+REPLY_TO = "hello@uniquarter.co.nz"
+# Change this whenever the consent wording under the form changes, so each
+# contact records which wording they agreed to.
+CONSENT_VERSION = "2026-11-01b"
+
+# Ten requests a minute from one address per Cloudflare location. Turnstile is
+# the main defence; this only blunts bursts.
+[[ratelimits]]
+name = "SIGNUP_LIMITER"
+namespace_id = "1001"
+simple = { limit = 10, period = 60 }
