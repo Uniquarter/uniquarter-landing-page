@@ -2,6 +2,7 @@
 // public web page can't hold the Resend key.
 //
 //   POST /subscribe  checks the form, then emails a confirmation link. Stores nothing.
+//                    One confirmation email per address per minute.
 //   POST /confirm    takes the token from that link, saves the contact in Resend
 //                    and emails the team a heads-up.
 //
@@ -61,6 +62,14 @@ async function subscribe(request, env) {
 
   if (!(await passedTurnstile(body.turnstileToken, request, env))) {
     return { status: 400, body: { error: "challenge" } };
+  }
+
+  // One confirmation email per address per minute, whoever asks. This stops
+  // the form being used to pester someone, and caps how fast the Resend
+  // allowance can be burned. It sits after the bot check so that nobody can
+  // lock an address out without passing that first.
+  if (!(await underEmailLimit(checked.value.email, env))) {
+    return { status: 429, body: { error: "email_limited" } };
   }
 
   var key = await importKey(env.TOKEN_KEY);
@@ -211,7 +220,22 @@ async function passedTurnstile(token, request, env) {
   var res = await fetch(TURNSTILE_VERIFY, { method: "POST", body: form });
   if (!res.ok) return false;
   var outcome = await res.json();
-  return outcome.success === true;
+  // The token must have been earned on this site, not on a copy of the form
+  // somewhere else that happens to carry the same site key.
+  return outcome.success === true && isAllowedHostname(outcome.hostname, env);
+}
+
+export function isAllowedHostname(hostname, env) {
+  if (typeof hostname !== "string" || !hostname) return false;
+  var hosts = String(env.ALLOWED_ORIGINS || "").split(",").map(function (s) {
+    try {
+      return new URL(s.trim()).hostname;
+    } catch (e) {
+      return "";
+    }
+  });
+  if (hosts.indexOf(hostname) !== -1) return true;
+  return env.DEV === "true";
 }
 
 // A burst limit only. Turnstile does the real work of keeping bots out.
@@ -222,13 +246,33 @@ async function underRateLimit(request, env) {
   return outcome.success;
 }
 
-async function readJson(request) {
+// Keyed on a hash of the address, so the address itself is never handed to
+// the limiter.
+async function underEmailLimit(email, env) {
+  if (!env.EMAIL_LIMITER) return true;
+  var digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(email));
+  var outcome = await env.EMAIL_LIMITER.limit({ key: bytesToHex(new Uint8Array(digest)) });
+  return outcome.success;
+}
+
+function bytesToHex(bytes) {
+  var s = "";
+  for (var i = 0; i < bytes.length; i++) s += (bytes[i] < 16 ? "0" : "") + bytes[i].toString(16);
+  return s;
+}
+
+export async function readJson(request) {
   var type = request.headers.get("Content-Type") || "";
   if (type.indexOf("application/json") !== 0) return null;
-  var text = await request.text();
-  if (text.length > MAX_BODY_BYTES) return null;
+  // The declared size is checked before anything is read, so an oversized
+  // request is refused without being held in memory. The real size is
+  // checked too, since the declared one can be missing or wrong.
+  var declared = Number(request.headers.get("Content-Length"));
+  if (declared > MAX_BODY_BYTES) return null;
+  var bytes = await request.arrayBuffer();
+  if (bytes.byteLength > MAX_BODY_BYTES) return null;
   try {
-    var body = JSON.parse(text);
+    var body = JSON.parse(new TextDecoder().decode(bytes));
     return body && typeof body === "object" ? body : null;
   } catch (e) {
     return null;

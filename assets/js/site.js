@@ -304,6 +304,7 @@ function signupForm() {
 
   var MESSAGES = {
     rate_limited: "Too many tries from your connection. Wait a minute, then try again.",
+    email_limited: "We sent a link to that address less than a minute ago. Check your inbox and junk folder before trying again.",
     challenge: "We could not confirm you are a person. Try again, or email alex.moyse@uniquarter.co.nz instead.",
     network: "We could not send your details. Check your connection and try again.",
     other: "Something went wrong on our side. Try again in a few minutes, or email alex.moyse@uniquarter.co.nz instead."

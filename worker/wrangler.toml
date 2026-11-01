@@ -26,9 +26,17 @@ NOTIFY_TO = "hello@uniquarter.co.nz"
 # contact records which wording they agreed to.
 CONSENT_VERSION = "2026-11-01b"
 
-# Ten requests a minute from one address per Cloudflare location. Turnstile is
-# the main defence; this only blunts bursts.
+# Ten requests a minute from one connection per Cloudflare location. Turnstile
+# is the main defence; this only blunts bursts.
 [[ratelimits]]
 name = "SIGNUP_LIMITER"
 namespace_id = "1001"
 simple = { limit = 10, period = 60 }
+
+# One confirmation email a minute to any one address, per Cloudflare location,
+# whoever asks for it. Cloudflare only counts over 10 or 60 seconds, so a
+# longer window isn't available here.
+[[ratelimits]]
+name = "EMAIL_LIMITER"
+namespace_id = "1002"
+simple = { limit = 1, period = 60 }

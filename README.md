@@ -12,7 +12,7 @@ The app lives in a separate private monorepo (`uni-quarter`). This site borrows 
 | `404.html` | Served by GitHub Pages for any address that does not exist |
 | `privacy/index.html` | The privacy notice for the sign-up form |
 | `confirm/index.html` | Where the link in the confirmation email lands. Not indexed |
-| `worker/` | The Cloudflare Worker behind the sign-up form, with its tests and setup script |
+| `worker/` | The Cloudflare Worker behind the sign-up form, with its tests and setup script. The tests stand in for Turnstile, Resend and the rate limiters, so they run offline |
 | `.github/workflows/worker.yml` | Tests and deploys the Worker when `worker/` changes on `main` |
 | `assets/css/tokens.css` | The design system's tokens, copied in by the sync script. Do not edit by hand |
 | `assets/css/site.css` | Everything else: base rules, layout, components, and the marketing additions |
@@ -91,7 +91,7 @@ The "Register your interest" section holds a sign-up form. The list lives in Res
 
 1. The visitor fills in the form. If their email domain looks like a typo of a common one, such as gmial.com, the form offers "Did you mean ..." with a button to fix it. The domain list is `SIGNUP_DOMAINS` in `site.js`. Cloudflare Turnstile, usually invisibly, checks they are a person.
 2. `site.js` posts the form to the Worker's `/subscribe` address.
-3. The Worker checks the fields and the Turnstile result. It seals the sign-up into an encrypted token that lasts 24 hours, and emails a link to `https://uniquarter.co.nz/confirm/#<token>`. It stores nothing.
+3. The Worker checks the fields and the Turnstile result, including that the check was passed on uniquarter.co.nz and not on a copy of the form elsewhere. It seals the sign-up into an encrypted token that lasts 24 hours, and emails a link to `https://uniquarter.co.nz/confirm/#<token>`. It stores nothing. It sends at most one confirmation email a minute to any one address, whoever asks, so the form can't be used to pester someone or to burn through the Resend allowance. The address is hashed before it reaches the rate limiter.
 4. On the confirm page, the visitor presses "Confirm my interest". The button posts the token to `/confirm`. A button is used so that email scanners that open links can't confirm on someone's behalf.
 5. The Worker opens the token and creates or updates the contact in Resend, in the "Register interest" segment, with the properties `role`, `institution`, `consented_at`, `consent_version` and `source`. It then emails hello@uniquarter.co.nz a short heads-up with the person's details, so the team sees each registration as it lands. A failed heads-up is logged, but the person stays on the list.
 
@@ -113,7 +113,7 @@ IMPORTANT: when the wording under the form changes, change `CONSENT_VERSION` in 
 
 ### One-off setup
 
-1. **Resend.** Create an account, add the domain `news.uniquarter.co.nz` (Tokyo region) and add the DNS records it lists, with hosts such as `send.news` and `resend._domainkey.news`. Emails go out from `hello@news.uniquarter.co.nz`, a sub-address kept apart from the main domain so that newsletter spam complaints can't hurt the reputation of everyday Outlook mail. Replies go to `hello@uniquarter.co.nz`. None of these records touch the Microsoft 365 mail records. The domain's DNS is managed at the registrar, not in UniQuarter's Cloudflare account. Also add a TXT record with host `_dmarc` and value `v=DMARC1; p=none;`, which Gmail and Yahoo expect from anyone sending to their users. Create a full-access API key, then run this from `worker/`:
+1. **Resend.** Create an account, add the domain `news.uniquarter.co.nz`, choosing the Tokyo region, and add the DNS records it lists. The region only sets where emails are sent from; Resend keeps the contact list in the United States, which is what the privacy page says, with hosts such as `send.news` and `resend._domainkey.news`. Emails go out from `hello@news.uniquarter.co.nz`, a sub-address kept apart from the main domain so that newsletter spam complaints can't hurt the reputation of everyday Outlook mail. Replies go to `hello@uniquarter.co.nz`. None of these records touch the Microsoft 365 mail records. The domain's DNS is managed at the registrar, not in UniQuarter's Cloudflare account. Also add a TXT record with host `_dmarc` and value `v=DMARC1; p=none;`, which Gmail and Yahoo expect from anyone sending to their users. Create a full-access API key, then run this from `worker/`:
    ```
    npm ci
    RESEND_API_KEY=re_xxx npm run setup-resend
