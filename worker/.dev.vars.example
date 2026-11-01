@@ -1,0 +1,11 @@
+# Copy to .dev.vars (git ignores it) for `npm run dev`. Never commit real values.
+DEV=true
+RESEND_API_KEY=re_replace_me
+RESEND_SEGMENT_ID=replace_me
+# node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+TOKEN_KEY=replace_me
+# Turnstile's test secret, which always passes. Pair it with the test site key
+# 1x00000000000000000000AA on the form while testing locally.
+TURNSTILE_SECRET=1x0000000000000000000000000000000AA
+# Point confirmation links at the local copy of the site.
+CONFIRM_URL=http://localhost:8000/confirm/

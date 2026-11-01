@@ -1,0 +1,18 @@
+{
+  "name": "uniquarter-signup",
+  "private": true,
+  "type": "module",
+  "description": "The Cloudflare Worker behind the sign-up form on uniquarter.co.nz",
+  "scripts": {
+    "test": "node --test",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "setup-resend": "node scripts/setup-resend.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "4.151.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

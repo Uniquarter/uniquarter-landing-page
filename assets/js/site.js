@@ -224,3 +224,240 @@ holdCardHeights();
 window.addEventListener("resize", queueHoldCardHeights);
 window.addEventListener("load", queueHoldCardHeights);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(queueHoldCardHeights);
+
+// The sign-up form. It needs JavaScript, as does the Turnstile bot check, so it
+// stays hidden until this finds both settings on the form filled in. Until then
+// the email address above it is the way in. The checks here mirror
+// worker/src/validate.js, which has the final say.
+var SIGNUP_NAME_REFUSED = /[<>@\\{}[\]]|:\/\/|www\.|\.(com|net|org|nz|io|co|ru|xyz)\b/i;
+var SIGNUP_EMAIL = /^[^\s@<>()",;:\\]+@[^\s@<>()",;:\\]+\.[^\s@<>()",;:\\]{2,}$/;
+
+function signupForm() {
+  var form = document.getElementById("signup");
+  if (!form) return;
+  var endpoint = form.getAttribute("data-endpoint");
+  var siteKey = form.getAttribute("data-sitekey");
+  if (!endpoint || !siteKey || siteKey.indexOf("REPLACE") === 0) return;
+
+  var summary = document.getElementById("signup-errors");
+  var status = document.getElementById("signup-status");
+  var done = document.getElementById("signup-done");
+  var button = form.querySelector("button[type=submit]");
+  var institutionField = document.getElementById("signup-institution-field");
+  var radios = Array.prototype.slice.call(form.querySelectorAll("input[name=role]"));
+  var widget = null;
+  var turnstileToken = "";
+  var busy = false;
+
+  var fields = {
+    firstName: { focus: form.elements.firstName, error: document.getElementById("signup-name-error"), marked: [form.elements.firstName] },
+    email: { focus: form.elements.email, error: document.getElementById("signup-email-error"), marked: [form.elements.email] },
+    role: { focus: radios[0], error: document.getElementById("signup-role-error"), marked: radios }
+  };
+
+  var MESSAGES = {
+    rate_limited: "Too many tries from your connection. Wait a minute, then try again.",
+    challenge: "We could not confirm you are a person. Try again, or email alex.moyse@uniquarter.co.nz instead.",
+    network: "We could not send your details. Check your connection and try again.",
+    other: "Something went wrong on our side. Try again in a few minutes, or email alex.moyse@uniquarter.co.nz instead."
+  };
+
+  // Institution only applies to students and institutions.
+  function showInstitution() {
+    var role = form.elements.role.value;
+    var show = role === "student" || role === "institution";
+    institutionField.hidden = !show;
+    if (!show) form.elements.institution.value = "";
+  }
+
+  function check() {
+    var bad = [];
+    var name = form.elements.firstName.value.replace(/\s+/g, " ").trim();
+    if (!name || name.length > 50 || SIGNUP_NAME_REFUSED.test(name)) bad.push("firstName");
+    var email = form.elements.email.value.trim();
+    if (!email || email.length > 254 || !SIGNUP_EMAIL.test(email)) bad.push("email");
+    if (!form.elements.role.value) bad.push("role");
+    return bad;
+  }
+
+  // Marks each field and lists the problems in a summary at the top, whose
+  // links move focus to the field concerned.
+  function showErrors(bad) {
+    var list = summary.querySelector("ul");
+    list.textContent = "";
+    Object.keys(fields).forEach(function (key) {
+      var field = fields[key];
+      var on = bad.indexOf(key) !== -1;
+      field.error.hidden = !on;
+      field.error.closest(".field").classList.toggle("has-error", on);
+      field.marked.forEach(function (input) {
+        if (on) input.setAttribute("aria-invalid", "true");
+        else input.removeAttribute("aria-invalid");
+      });
+      if (!on) return;
+      var item = document.createElement("li");
+      var link = document.createElement("a");
+      link.href = "#" + field.focus.id;
+      link.textContent = field.error.textContent;
+      link.addEventListener("click", function (e) {
+        e.preventDefault();
+        field.focus.focus();
+      });
+      item.appendChild(link);
+      list.appendChild(item);
+    });
+    summary.hidden = bad.length === 0;
+    if (bad.length) summary.focus();
+  }
+
+  function ready() {
+    busy = false;
+    button.disabled = false;
+    turnstileToken = "";
+    if (widget !== null) window.turnstile.reset(widget);
+  }
+
+  function finish(email) {
+    form.hidden = true;
+    document.getElementById("signup-done-email").textContent = email;
+    done.hidden = false;
+    done.focus();
+  }
+
+  window.uqTurnstileReady = function () {
+    widget = window.turnstile.render("#signup-challenge", {
+      sitekey: siteKey,
+      appearance: "interaction-only",
+      size: "flexible",
+      theme: "light",
+      "refresh-expired": "auto",
+      callback: function (token) { turnstileToken = token; },
+      "expired-callback": function () { turnstileToken = ""; }
+    });
+  };
+  var script = document.createElement("script");
+  script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=uqTurnstileReady";
+  script.async = true;
+  document.head.appendChild(script);
+
+  form.addEventListener("change", function (e) {
+    if (e.target.name === "role") showInstitution();
+  });
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (busy) return;
+    var bad = check();
+    showErrors(bad);
+    status.textContent = "";
+    if (bad.length) return;
+    if (!turnstileToken) {
+      status.textContent = "Still checking you are a person. Try again in a moment.";
+      return;
+    }
+
+    var email = form.elements.email.value.trim();
+    busy = true;
+    button.disabled = true;
+    status.textContent = "Sending…";
+    fetch(endpoint + "/subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        firstName: form.elements.firstName.value,
+        email: email,
+        role: form.elements.role.value,
+        institution: form.elements.institution.value,
+        website: form.elements.website.value,
+        turnstileToken: turnstileToken
+      })
+    })
+      .then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (body) {
+          return { status: res.status, body: body };
+        });
+      })
+      .then(function (reply) {
+        if (reply.status === 202) {
+          status.textContent = "";
+          finish(email);
+          return;
+        }
+        if (reply.body.error === "invalid" && reply.body.fields) {
+          status.textContent = "";
+          showErrors(reply.body.fields);
+        } else {
+          status.textContent = MESSAGES[reply.body.error] || MESSAGES.other;
+        }
+        ready();
+      })
+      .catch(function () {
+        status.textContent = MESSAGES.network;
+        ready();
+      });
+  });
+
+  showInstitution();
+  form.classList.add("signup-ready");
+}
+
+signupForm();
+
+// The confirm page. The token arrives after the # in the link, so it never
+// reaches the web server's logs. It is read once, then cleared from the
+// address bar. A button, not the link itself, confirms, so email
+// scanners that open links can't confirm on someone's behalf.
+function confirmSignup() {
+  var root = document.getElementById("confirm");
+  if (!root) return;
+  var endpoint = root.getAttribute("data-endpoint");
+  var states = Array.prototype.slice.call(root.querySelectorAll("[data-state]"));
+  var button = document.getElementById("confirm-button");
+  var token = location.hash.slice(1);
+  if (token) history.replaceState(null, "", location.pathname + location.search);
+
+  function show(name) {
+    states.forEach(function (el) {
+      el.hidden = el.getAttribute("data-state") !== name;
+    });
+    var heading = root.querySelector('[data-state="' + name + '"] h1');
+    if (heading && name !== "ready") heading.focus();
+  }
+
+  if (!/^[A-Za-z0-9_-]{40,2048}$/.test(token)) {
+    show("invalid");
+    return;
+  }
+  show("ready");
+
+  var OUTCOMES = { 200: "done", 409: "used", 410: "expired", 400: "invalid" };
+  button.addEventListener("click", function () {
+    if (button.disabled) return;
+    button.disabled = true;
+    button.textContent = "Confirming…";
+    fetch(endpoint + "/confirm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: token })
+    })
+      .then(function (res) {
+        show(OUTCOMES[res.status] || "error");
+      })
+      .catch(function () {
+        show("error");
+      })
+      .then(function () {
+        button.disabled = false;
+        button.textContent = "Confirm my interest";
+      });
+  });
+
+  // From the error state the visitor can try again with the same token.
+  var retry = document.getElementById("confirm-retry");
+  if (retry) retry.addEventListener("click", function () {
+    show("ready");
+    button.focus();
+  });
+}
+
+confirmSignup();

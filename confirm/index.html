@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en-NZ" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Confirm your interest | UniQuarter</title>
+<!-- Not for search engines, and never sent as a referrer, because the
+     address carries the confirmation token until site.js clears it. -->
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#175B68">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="../favicon.ico" sizes="any">
+<link rel="stylesheet" href="../assets/css/tokens.css?v=20261101d">
+<link rel="stylesheet" href="../assets/css/site.css?v=20261101d">
+<script>document.documentElement.classList.add('js')</script>
+<script src="../assets/js/site.js?v=20261101d" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="../"><img src="../assets/img/logo/uq-lockup-horizontal.svg" width="823" height="200" alt="UniQuarter home"></a>
+  </div>
+</header>
+
+<main id="main">
+  <!-- data-endpoint: the sign-up Worker's address, the same as on the home page's form. -->
+  <section class="page" id="confirm" data-endpoint="https://uniquarter-signup.uniquarter.workers.dev">
+    <div class="wrap">
+      <div data-state="nojs">
+        <h1 tabindex="-1">Confirm your interest</h1>
+        <p class="lead">This page needs JavaScript to confirm your interest. Turn it on and open the link again, or email us at <a href="mailto:hello@uniquarter.co.nz">hello@uniquarter.co.nz</a> and we will add you.</p>
+      </div>
+
+      <div data-state="ready" hidden>
+        <h1 tabindex="-1">Confirm your interest</h1>
+        <p class="lead">Press the button to confirm, and we will keep you updated as we progress towards launching the platform.</p>
+        <button class="btn btn-primary btn-lg" type="button" id="confirm-button">Confirm my interest</button>
+      </div>
+
+      <div data-state="done" hidden>
+        <h1 tabindex="-1">Thanks for registering your interest</h1>
+        <p class="lead">You are confirmed. We will keep you updated as we progress towards launching the platform, and you can unsubscribe at any time.</p>
+        <a class="btn btn-primary btn-lg" href="../">Go to the home page</a>
+      </div>
+
+      <div data-state="expired" hidden>
+        <h1 tabindex="-1">This link has expired</h1>
+        <p class="lead">Confirmation links last 24 hours. Register your interest again and we will send you a new one.</p>
+        <a class="btn btn-primary btn-lg" href="../#contact">Register interest again</a>
+      </div>
+
+      <div data-state="used" hidden>
+        <h1 tabindex="-1">This link has already been used</h1>
+        <p class="lead">If you have already confirmed, your interest is registered and there is nothing more to do. If you have unsubscribed since and want to come back, register your interest again.</p>
+        <a class="btn btn-primary btn-lg" href="../#contact">Register interest again</a>
+      </div>
+
+      <div data-state="invalid" hidden>
+        <h1 tabindex="-1">This link does not work</h1>
+        <p class="lead">It may have been cut short when it was copied. Open it straight from the email, or register your interest again.</p>
+        <a class="btn btn-primary btn-lg" href="../#contact">Register interest again</a>
+      </div>
+
+      <div data-state="error" hidden>
+        <h1 tabindex="-1">Something went wrong</h1>
+        <p class="lead">We could not confirm your interest just now. Try again in a few minutes. If it keeps happening, email us at <a href="mailto:hello@uniquarter.co.nz">hello@uniquarter.co.nz</a>.</p>
+        <button class="btn btn-primary btn-lg" type="button" id="confirm-retry">Try again</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer on-inverse">
+  <div class="wrap footer-inner">
+    <div class="footer-legal">
+      <img src="../assets/img/logo/uq-lockup-horizontal-reversed.svg" width="823" height="200" alt="UniQuarter">
+      <p>UniQuarter Limited, Christchurch, New Zealand.</p>
+    </div>
+    <div class="footer-right">
+      <p><a href="mailto:hello@uniquarter.co.nz">hello@uniquarter.co.nz</a></p>
+      <p><a href="../privacy/">Privacy</a></p>
+      <p>&copy; 2026 UniQuarter Limited</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

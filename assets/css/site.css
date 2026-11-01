@@ -423,6 +423,16 @@ section {
     border-top: var(--uq-border-width-hairline) solid var(--uq-color-border-default);
   }
 }
+/* The narrowest phones: a smaller logo and gap, so the logo, Contact and the
+ * menu button fit inside the gutters. */
+@media (max-width: 22.5rem) {
+  .header-inner {
+    gap: var(--uq-space-3);
+  }
+  .brand img {
+    width: 120px;
+  }
+}
 
 /* ---------- Hero ---------- */
 .hero {
@@ -1173,7 +1183,7 @@ details[open] > summary .chev::before {
 .contact h2 {
   color: var(--uq-color-text-on-inverse);
 }
-.contact p {
+.contact-intro p {
   max-width: 56ch;
   margin: 0 auto var(--uq-space-6);
   line-height: var(--lp-line-height-prose);
@@ -1186,16 +1196,269 @@ details[open] > summary .chev::before {
   color: var(--uq-color-text-on-inverse);
   text-decoration-thickness: 2px;
 }
-.mailto {
-  font-family: var(--uq-font-family-display);
-  font-size: clamp(1rem, 0.8rem + 1.2vw, 1.5rem);
-  font-weight: var(--uq-font-weight-bold);
-  overflow-wrap: anywhere;
-}
 @media (max-width: 38.75rem) {
   .contact {
     padding: var(--uq-space-10) var(--uq-space-5);
   }
+}
+
+/* ---------- Sign-up form ----------
+ * The invitation stays centred at the top of the teal panel, and the form
+ * spans the panel's full width beneath it on a white card. The card keeps the
+ * inputs, the danger colours and the focus ring at the design system's
+ * contrast. Name and email sit side by side on wide screens. Without
+ * JavaScript the form stays hidden and a note gives Alex's address instead. */
+.contact noscript p {
+  margin-top: var(--uq-space-4);
+}
+.signup {
+  display: none;
+}
+.signup.signup-ready {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--uq-space-5) var(--uq-space-6);
+}
+.signup > * {
+  grid-column: 1 / -1;
+}
+.signup > .field-half {
+  grid-column: auto;
+}
+/* The institution select sits alone on its row, at half width. */
+.signup > #signup-institution-field {
+  grid-column: 1;
+}
+.signup,
+.signup-done {
+  margin-top: var(--uq-space-8);
+  text-align: left;
+}
+.signup[hidden],
+.signup-done[hidden],
+.signup-errors[hidden],
+.field[hidden],
+.field-error[hidden] {
+  display: none;
+}
+.signup,
+.signup-done {
+  padding: var(--uq-space-6);
+  border-radius: var(--uq-radius-md);
+  background: var(--uq-color-bg-surface);
+  color: var(--uq-color-text-default);
+  box-shadow: var(--uq-shadow-md);
+}
+/* Links on the white card take the ordinary link colours. The teal panel's
+ * white link rules would otherwise win, and the link would vanish on hover. */
+.contact .signup a:not(.btn),
+.contact .signup-done a:not(.btn) {
+  color: var(--uq-link-fg);
+}
+.contact .signup a:not(.btn):hover,
+.contact .signup-done a:not(.btn):hover {
+  color: var(--uq-link-fg-hover);
+  text-decoration-thickness: 2px;
+}
+.signup .btn {
+  justify-self: start;
+}
+.field {
+  display: grid;
+  gap: var(--uq-space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+/* Direct children only, so the radio-button labels keep their own padding. */
+.field > label,
+.field legend {
+  padding: 0;
+  font-size: var(--uq-font-size-sm);
+  font-weight: var(--uq-font-weight-semibold);
+  color: var(--uq-color-text-strong);
+}
+.field legend {
+  margin-bottom: var(--uq-space-2);
+}
+.optional {
+  font-weight: normal;
+  color: var(--uq-color-text-muted);
+}
+.field input[type="text"],
+.field input[type="email"],
+.field select {
+  width: 100%;
+  min-height: var(--uq-input-height);
+  padding: 0 var(--uq-space-3);
+  border: var(--uq-border-width-emphasis) solid var(--uq-input-border);
+  border-radius: var(--uq-input-radius);
+  background: var(--uq-input-bg);
+  color: var(--uq-input-fg);
+  font: inherit;
+  font-size: var(--uq-font-size-md); /* 16px, so phones do not zoom in on focus */
+}
+.field input:hover,
+.field select:hover {
+  border-color: var(--uq-input-border-hover);
+}
+.field input:focus-visible,
+.field select:focus-visible {
+  border-color: var(--uq-input-border-focus);
+}
+.field.has-error input[type="text"],
+.field.has-error input[type="email"] {
+  border-color: var(--uq-input-border-error);
+}
+.field-error {
+  margin: 0;
+  font-size: var(--uq-font-size-sm);
+  font-weight: var(--uq-font-weight-semibold);
+  color: var(--uq-color-text-danger);
+}
+/* Even columns, each wide enough for the longest option on one line: three
+ * across on desktop, two on tablets, stacked on phones. */
+.choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16.5rem, 1fr));
+  gap: var(--uq-space-2);
+}
+.choice {
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: var(--uq-space-3);
+  min-height: var(--uq-size-target-touch);
+  padding: var(--uq-space-2) var(--uq-space-3);
+  border: var(--uq-border-width-hairline) solid var(--uq-color-border-default);
+  border-radius: var(--uq-radius-sm);
+  font-size: var(--uq-font-size-sm);
+  font-weight: normal;
+  line-height: var(--uq-font-line-height-snug);
+  color: var(--uq-color-text-default);
+  cursor: pointer;
+}
+.choice:has(input:checked) {
+  border-color: var(--uq-color-action-primary-bg);
+  background: var(--uq-color-bg-brand-subtle);
+}
+.choice input {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
+  accent-color: var(--uq-color-action-primary-bg);
+}
+.field.has-error .choice {
+  border-color: var(--uq-input-border-error);
+}
+.signup-errors {
+  padding: var(--uq-space-4);
+  border: var(--uq-border-width-emphasis) solid var(--uq-color-status-danger-border);
+  border-radius: var(--uq-radius-sm);
+  background: var(--uq-color-status-danger-bg);
+}
+.signup-errors h3 {
+  margin: 0 0 var(--uq-space-2);
+  font-family: var(--uq-font-family-body);
+  font-size: var(--uq-font-size-md);
+  color: var(--uq-color-text-danger);
+}
+.signup-errors ul {
+  margin: 0;
+  padding-left: var(--uq-space-5);
+}
+.contact .signup .signup-errors a:not(.btn),
+.contact .signup .signup-errors a:not(.btn):hover {
+  color: var(--uq-color-text-danger);
+  font-weight: var(--uq-font-weight-semibold);
+}
+/* The honeypot: off screen for people, still in the form for bots. */
+.signup-trap {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.signup-challenge:empty {
+  display: none;
+}
+.signup .signup-note {
+  margin: 0;
+  font-size: var(--uq-font-size-sm);
+  line-height: var(--uq-font-line-height-normal);
+  color: var(--uq-color-text-strong);
+}
+.signup .signup-status {
+  margin: 0;
+  font-size: var(--uq-font-size-sm);
+  font-weight: var(--uq-font-weight-semibold);
+  color: var(--uq-color-text-strong);
+}
+.signup .signup-status:empty {
+  display: none;
+}
+.signup-done h3 {
+  margin-bottom: var(--uq-space-3);
+}
+.signup-done p {
+  margin: 0 0 var(--uq-space-3);
+  color: var(--uq-color-text-strong);
+  overflow-wrap: anywhere;
+}
+.signup-done p:last-child {
+  margin-bottom: 0;
+}
+@media (max-width: 40rem) {
+  .signup.signup-ready {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .choices {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .choice {
+    white-space: normal;
+  }
+}
+@media (max-width: 38.75rem) {
+  .signup,
+  .signup-done {
+    padding: var(--uq-space-5) var(--uq-space-4);
+  }
+}
+
+/* ---------- Plain pages (privacy, confirm) ---------- */
+.page {
+  padding: var(--uq-space-16) 0 var(--uq-space-24);
+}
+.page .wrap > * {
+  max-width: 68ch;
+}
+.page h2 {
+  margin-top: var(--uq-space-10);
+  font-size: var(--lp-font-size-display-3);
+}
+.page p,
+.page li {
+  line-height: var(--lp-line-height-prose);
+  color: var(--uq-color-text-strong);
+}
+.page ul {
+  padding-left: var(--uq-space-5);
+}
+.page li + li {
+  margin-top: var(--uq-space-2);
+}
+.page .lead {
+  font-size: var(--lp-font-size-lead);
+}
+.page h1:focus {
+  outline: none;
+}
+.page [data-state][hidden] {
+  display: none;
 }
 
 /* ---------- Footer ---------- */

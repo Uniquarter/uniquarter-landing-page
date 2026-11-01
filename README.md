@@ -10,9 +10,13 @@ The app lives in a separate private monorepo (`uni-quarter`). This site borrows 
 |---|---|
 | `index.html` | The home page |
 | `404.html` | Served by GitHub Pages for any address that does not exist |
+| `privacy/index.html` | The privacy notice for the sign-up form |
+| `confirm/index.html` | Where the link in the confirmation email lands. Not indexed |
+| `worker/` | The Cloudflare Worker behind the sign-up form, with its tests and setup script |
+| `.github/workflows/worker.yml` | Tests and deploys the Worker when `worker/` changes on `main` |
 | `assets/css/tokens.css` | The design system's tokens, copied in by the sync script. Do not edit by hand |
 | `assets/css/site.css` | Everything else: base rules, layout, components, and the marketing additions |
-| `assets/js/site.js` | The two tab groups, and the equal-height cards. The page works without it: every panel shows, stacked, and the cards stretch together |
+| `assets/js/site.js` | The two tab groups, the equal-height cards, the sign-up form and the confirm page. The page works without it: every panel shows, stacked, the cards stretch together, and the sign-up section shows the email address instead of the form |
 | `assets/fonts/` | Bricolage Grotesque and Instrument Sans, self-hosted, with their OFL licences |
 | `assets/img/` | App screenshots, and the logo lockups from the brand files |
 | `favicon.ico`, `apple-touch-icon.png`, `og-image.png` | Browser, home-screen and link-preview images |
@@ -78,6 +82,68 @@ The site follows the design system wherever the rule is about accessibility or b
 - Grey text on the light grey bands failed contrast in two places. It now uses the stronger text colour.
 
 The page passes axe (WCAG 2.2 AA plus best practice) at 1280, 375 and 320px wide, with no horizontal scroll.
+
+## The sign-up form
+
+The "Register your interest" section holds a sign-up form. The list lives in Resend, the email provider. A small Cloudflare Worker sits between the page and Resend, because a public web page can't hold the Resend key.
+
+### How a sign-up works
+
+1. The visitor fills in the form. Cloudflare Turnstile, usually invisibly, checks they are a person.
+2. `site.js` posts the form to the Worker's `/subscribe` address.
+3. The Worker checks the fields and the Turnstile result. It seals the sign-up into an encrypted token that lasts 24 hours, and emails a link to `https://uniquarter.co.nz/confirm/#<token>`. It stores nothing.
+4. On the confirm page, the visitor presses "Confirm my interest". The button posts the token to `/confirm`. A button is used so that email scanners that open links can't confirm on someone's behalf.
+5. The Worker opens the token and creates or updates the contact in Resend, in the "Register interest" segment, with the properties `role`, `institution`, `consented_at`, `consent_version` and `source`.
+
+Nobody is stored until they confirm. `consented_at` makes each link single use, so an old link can't re-subscribe someone who has unsubscribed since.
+
+### Where the settings live
+
+| Setting | Where |
+|---|---|
+| The Worker's address | `data-endpoint` on the form in `index.html`, and on `#confirm` in `confirm/index.html` |
+| The Turnstile site key (public) | `data-sitekey` on the form in `index.html` |
+| Sender, reply-to, allowed origins, confirm page address, consent version | `[vars]` in `worker/wrangler.toml` |
+| `RESEND_API_KEY`, `RESEND_SEGMENT_ID`, `TOKEN_KEY`, `TURNSTILE_SECRET` | GitHub repository secrets, pushed to the Worker by the workflow |
+| `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | GitHub repository secrets, used by the workflow to deploy |
+
+The form stays hidden, and the email address shows instead, until `data-sitekey` holds a real key. So the page is safe to publish before the setup below is finished.
+
+IMPORTANT: when the wording under the form changes, change `CONSENT_VERSION` in `worker/wrangler.toml` too, so each contact records which wording they agreed to.
+
+### One-off setup
+
+1. **Resend.** Create an account, add the domain `news.uniquarter.co.nz` (Tokyo region) and add the DNS records it lists, with hosts such as `send.news` and `resend._domainkey.news`. Emails go out from `hello@news.uniquarter.co.nz`, a sub-address kept apart from the main domain so that newsletter spam complaints can't hurt the reputation of everyday Outlook mail. Replies go to `hello@uniquarter.co.nz`. None of these records touch the Microsoft 365 mail records. The domain's DNS is managed at the registrar, not in UniQuarter's Cloudflare account. Also add a TXT record with host `_dmarc` and value `v=DMARC1; p=none;`, which Gmail and Yahoo expect from anyone sending to their users. Create a full-access API key, then run this from `worker/`:
+   ```
+   npm ci
+   RESEND_API_KEY=re_xxx npm run setup-resend
+   ```
+   It creates the five contact properties and the segment, and prints `RESEND_SEGMENT_ID`.
+2. **Cloudflare.** Create a free account. Set the workers.dev subdomain to `uniquarter`, which gives the Worker the address already in the HTML: `https://uniquarter-signup.uniquarter.workers.dev`. Add a Turnstile widget for `uniquarter.co.nz` and `www.uniquarter.co.nz` in Managed mode, and put its site key in `data-sitekey`. Create an API token from the "Edit Cloudflare Workers" template, limited to this account.
+3. **TOKEN_KEY.** Make one with `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`.
+4. **GitHub.** Add the six secrets from the table above under Settings, Secrets and variables, Actions. Then run the "Sign-up Worker" workflow from the Actions tab, or push a change under `worker/`.
+
+### Running it locally
+
+From `worker/`, copy `.dev.vars.example` to `.dev.vars` and fill it in. git ignores `.dev.vars`; never commit it. Then:
+
+```
+npm ci
+npm test
+npm run dev
+```
+
+`npm run dev` serves the Worker at http://localhost:8787 and allows requests from localhost. Serve the site with `python3 -m http.server 8000`, and while testing set the form's `data-endpoint` to `http://localhost:8787` and `data-sitekey` to Turnstile's test key `1x00000000000000000000AA`. Do the same for `data-endpoint` on the confirm page. Put both back before committing.
+
+### Replacing a key
+
+- **Resend key:** create a new one in Resend, update `RESEND_API_KEY` in GitHub, run the workflow, then delete the old key in Resend.
+- **Cloudflare API token:** it was created in November 2026 to expire after a year. When it lapses, the deploy workflow fails, but the live Worker keeps running. Make a new one from the "Edit Cloudflare Workers" template with only Workers Scripts (Edit), Account Settings (Read), Workers Tail (Read), User Details (Read) and Memberships (Read), then update `CLOUDFLARE_API_TOKEN` in GitHub.
+- **TOKEN_KEY:** replacing it breaks any confirmation links sent in the last 24 hours. Those people see "This link does not work" and can sign up again.
+
+### Exporting the list
+
+Resend's dashboard exports the segment as a CSV. When UniQuarter's production database exists, import the list there and update the privacy page before moving it.
 
 ## Publishing on GitHub Pages
 
