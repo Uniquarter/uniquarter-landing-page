@@ -351,11 +351,18 @@ section {
   font-weight: var(--uq-font-weight-medium);
   color: var(--uq-color-text-strong);
   text-decoration: none;
+  text-underline-offset: 0.35em;
   white-space: nowrap;
 }
 .nav a:not(.btn):hover {
   color: var(--uq-color-text-brand);
   text-decoration: underline;
+}
+/* The section being read, set by site.js as the page scrolls. */
+.nav a[aria-current="location"] {
+  color: var(--uq-color-text-brand);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
 }
 .nav-links {
   display: flex;
@@ -421,6 +428,20 @@ section {
   }
   .nav-links a:not(.btn) + a {
     border-top: var(--uq-border-width-hairline) solid var(--uq-color-border-default);
+  }
+  /* With the section links tucked away, a line along the foot of the header
+   * fills as the page is read. site.js sets --lp-read from 0 to 1. */
+  .js .site-header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--uq-border-width-hairline) * -1);
+    height: 2px;
+    background: var(--uq-color-text-brand);
+    transform: scaleX(var(--lp-read, 0));
+    transform-origin: left;
+    pointer-events: none;
   }
 }
 /* The narrowest phones: a smaller logo and gap, so the logo, Contact and the
@@ -1563,5 +1584,9 @@ details[open] > summary .chev::before {
     forced-color-adjust: none;
     background: Highlight;
     color: HighlightText;
+  }
+  .site-header::after {
+    forced-color-adjust: none;
+    background: Highlight;
   }
 }

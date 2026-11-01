@@ -69,6 +69,56 @@ function navMenu() {
 
 navMenu();
 
+// Marks the header link for the section being read. A section counts once its
+// top passes a line a quarter of the way down below the header, and it stays
+// marked through any unlinked sections after it, so "How it works" covers
+// "After move-in". The hero and the sign-up band mark nothing. Also sets
+// --lp-read on the header, from 0 at the top to 1 at the bottom, for the
+// reading line shown on phones.
+function navProgress() {
+  var header = document.querySelector(".site-header");
+  var links = Array.prototype.slice.call(document.querySelectorAll(".nav-links a[href^='#']"));
+  if (!header || !links.length) return;
+  var marks = links.map(function (link) {
+    return { link: link, el: document.getElementById(link.getAttribute("href").slice(1)) };
+  }).filter(function (mark) { return mark.el; });
+  var contact = document.getElementById("contact");
+  if (contact) marks.push({ link: null, el: contact.closest("section") || contact });
+  var current;
+  var queued = false;
+
+  function update() {
+    queued = false;
+    var line = header.offsetHeight + window.innerHeight * 0.25;
+    var active = null;
+    marks.forEach(function (mark) {
+      if (mark.el.getBoundingClientRect().top <= line) active = mark.link;
+    });
+    if (active !== current) {
+      links.forEach(function (link) {
+        if (link === active) link.setAttribute("aria-current", "location");
+        else link.removeAttribute("aria-current");
+      });
+      current = active;
+    }
+    var room = document.documentElement.scrollHeight - window.innerHeight;
+    header.style.setProperty("--lp-read", room > 0 ? Math.min(1, window.scrollY / room).toFixed(4) : "0");
+  }
+
+  function queue() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(update);
+  }
+
+  window.addEventListener("scroll", queue, { passive: true });
+  window.addEventListener("resize", queue);
+  window.addEventListener("load", queue);
+  update();
+}
+
+navProgress();
+
 // The app screens carousel on phones. Each phone sits at an offset from the
 // front: 0 is the front, -1 and 1 bleed off the screen edges. Offsets wrap
 // round, so a phone pushed off one edge comes back in on the other. Phones
