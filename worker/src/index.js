@@ -2,19 +2,21 @@
 // public web page can't hold the Resend key.
 //
 //   POST /subscribe  checks the form, then emails a confirmation link. Stores nothing.
-//   POST /confirm    takes the token from that link and saves the contact in Resend.
+//   POST /confirm    takes the token from that link, saves the contact in Resend
+//                    and emails the team a heads-up.
 //
 // Logs carry the route and the outcome only, never a name or an email address.
 
 import { validateSignup } from "./validate.js";
 import { importKey, sealToken, openToken, TokenError } from "./token.js";
+import { notificationEmail } from "./notify.js";
 
 const RESEND_API = "https://api.resend.com";
 const TURNSTILE_VERIFY = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const MAX_BODY_BYTES = 4096;
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     var url = new URL(request.url);
     var origin = request.headers.get("Origin") || "";
     var allowed = isAllowedOrigin(origin, env);
@@ -35,7 +37,7 @@ export default {
 
     var outcome;
     try {
-      outcome = route === "/subscribe" ? await subscribe(request, env) : await confirm(request, env);
+      outcome = route === "/subscribe" ? await subscribe(request, env) : await confirm(request, env, ctx);
     } catch (e) {
       console.log(JSON.stringify({ route: route, outcome: "exception", message: String(e && e.message) }));
       outcome = { status: 502, body: { error: "unavailable" } };
@@ -74,7 +76,7 @@ async function subscribe(request, env) {
   return { status: 202, body: { ok: true } };
 }
 
-async function confirm(request, env) {
+async function confirm(request, env, ctx) {
   if (!(await underRateLimit(request, env))) return { status: 429, body: { error: "rate_limited" } };
 
   var body = await readJson(request);
@@ -132,6 +134,10 @@ async function confirm(request, env) {
     });
     if (!created.ok) return { status: 502, body: { error: "unavailable" } };
   }
+
+  // The person is on the list by now, so a failed heads-up is only logged. It
+  // is sent after the reply, so it never slows the confirm page down.
+  if (env.NOTIFY_TO && ctx) ctx.waitUntil(resend(env, "POST", "/emails", notificationEmail(env, signup, existing.ok)));
 
   return { status: 200, body: { ok: true } };
 }

@@ -226,11 +226,58 @@ window.addEventListener("load", queueHoldCardHeights);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(queueHoldCardHeights);
 
 // The sign-up form. It needs JavaScript, as does the Turnstile bot check, so it
-// stays hidden until this finds both settings on the form filled in. Until then
-// the email address above it is the way in. The checks here mirror
-// worker/src/validate.js, which has the final say.
+// stays hidden until this finds both settings on the form filled in. Without
+// JavaScript, a noscript note gives Alex's address instead. The checks here
+// mirror worker/src/validate.js, which has the final say.
 var SIGNUP_NAME_REFUSED = /[<>@\\{}[\]]|:\/\/|www\.|\.(com|net|org|nz|io|co|ru|xyz)\b/i;
 var SIGNUP_EMAIL = /^[^\s@<>()",;:\\]+@[^\s@<>()",;:\\]+\.[^\s@<>()",;:\\]{2,}$/;
+
+// Email domains people commonly mistype, including the three institutions'
+// student and staff addresses. An address close to one of these, but not on
+// the list, gets a "Did you mean" prompt. It never blocks the form.
+var SIGNUP_DOMAINS = [
+  "gmail.com", "googlemail.com", "outlook.com", "hotmail.com", "live.com", "msn.com",
+  "yahoo.com", "icloud.com", "me.com", "protonmail.com", "proton.me",
+  "xtra.co.nz", "outlook.co.nz", "hotmail.co.nz", "live.co.nz", "yahoo.co.nz",
+  "uclive.ac.nz", "canterbury.ac.nz", "lincolnuni.ac.nz", "lincoln.ac.nz", "ara.ac.nz"
+];
+
+// The number of single-letter changes, including swapping two neighbours,
+// that turn one word into the other.
+function editDistance(a, b) {
+  var d = [];
+  for (var i = 0; i <= a.length; i++) {
+    d[i] = [i];
+    for (var j = 1; j <= b.length; j++) {
+      if (i === 0) { d[i][j] = j; continue; }
+      var cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost);
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+        d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+      }
+    }
+  }
+  return d[a.length][b.length];
+}
+
+// Short domains allow one slip and longer ones two, so a real but unusual
+// domain is rarely second-guessed.
+function suggestEmail(email) {
+  var at = email.lastIndexOf("@");
+  if (at < 1) return "";
+  var domain = email.slice(at + 1).toLowerCase();
+  if (!domain || SIGNUP_DOMAINS.indexOf(domain) !== -1) return "";
+  var best = "";
+  var bestDistance = Infinity;
+  SIGNUP_DOMAINS.forEach(function (known) {
+    var distance = editDistance(domain, known);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      best = known;
+    }
+  });
+  return bestDistance <= (domain.length < 8 ? 1 : 2) ? email.slice(0, at + 1) + best : "";
+}
 
 function signupForm() {
   var form = document.getElementById("signup");
@@ -281,8 +328,11 @@ function signupForm() {
   }
 
   // Marks each field and lists the problems in a summary at the top, whose
-  // links move focus to the field concerned.
-  function showErrors(bad) {
+  // links move focus to the field concerned. Focus moves to the summary only
+  // on submit, not while errors clear as the visitor fixes them.
+  var shown = [];
+  function showErrors(bad, quiet) {
+    shown = bad;
     var list = summary.querySelector("ul");
     list.textContent = "";
     Object.keys(fields).forEach(function (key) {
@@ -307,7 +357,7 @@ function signupForm() {
       list.appendChild(item);
     });
     summary.hidden = bad.length === 0;
-    if (bad.length) summary.focus();
+    if (bad.length && !quiet) summary.focus();
   }
 
   function ready() {
@@ -340,8 +390,38 @@ function signupForm() {
   script.async = true;
   document.head.appendChild(script);
 
+  // "Did you mean name@gmail.com?" under the email box, with a button that
+  // swaps the suggestion in. Shown when the visitor leaves the box.
+  var suggestBox = document.getElementById("signup-email-suggest");
+  function showSuggestion() {
+    var suggestion = suggestEmail(form.elements.email.value.trim());
+    suggestBox.textContent = "";
+    if (!suggestion) return;
+    var swap = document.createElement("button");
+    swap.type = "button";
+    swap.textContent = suggestion;
+    swap.addEventListener("click", function () {
+      form.elements.email.value = suggestion;
+      suggestBox.textContent = "";
+      form.elements.email.focus();
+    });
+    suggestBox.appendChild(document.createTextNode("Did you mean "));
+    suggestBox.appendChild(swap);
+    suggestBox.appendChild(document.createTextNode("?"));
+  }
+
+  // A fixed field loses its error straight away. Fields not yet flagged are
+  // left alone until the next submit.
+  function clearFixed() {
+    if (!shown.length) return;
+    var still = check();
+    showErrors(shown.filter(function (key) { return still.indexOf(key) !== -1; }), true);
+  }
+
   form.addEventListener("change", function (e) {
     if (e.target.name === "role") showInstitution();
+    if (e.target.name === "email") showSuggestion();
+    clearFixed();
   });
 
   form.addEventListener("submit", function (e) {

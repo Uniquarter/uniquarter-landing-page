@@ -20,6 +20,8 @@ CONFIRM_URL = "https://uniquarter.co.nz/confirm/"
 # Replies go to the shared hello@ mailbox on the main domain.
 FROM = "UniQuarter <hello@news.uniquarter.co.nz>"
 REPLY_TO = "hello@uniquarter.co.nz"
+# Gets a short email each time someone confirms.
+NOTIFY_TO = "hello@uniquarter.co.nz"
 # Change this whenever the consent wording under the form changes, so each
 # contact records which wording they agreed to.
 CONSENT_VERSION = "2026-11-01b"

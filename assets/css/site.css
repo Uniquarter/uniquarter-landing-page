@@ -1222,8 +1222,11 @@ details[open] > summary .chev::before {
 .signup > * {
   grid-column: 1 / -1;
 }
+/* Each field keeps its own height. Without this, a message under one box
+ * would stretch the field beside it, and that box would grow to fill the gap. */
 .signup > .field-half {
   grid-column: auto;
+  align-self: start;
 }
 /* The institution select sits alone on its row, at half width. */
 .signup > #signup-institution-field {
@@ -1316,6 +1319,31 @@ details[open] > summary .chev::before {
   font-size: var(--uq-font-size-sm);
   font-weight: var(--uq-font-weight-semibold);
   color: var(--uq-color-text-danger);
+}
+/* "Did you mean ...?" under the email box. The address is a button that
+ * reads like a link, sitting inline in the sentence. */
+.field-suggest {
+  margin: 0;
+  font-size: var(--uq-font-size-sm);
+  color: var(--uq-color-text-strong);
+  overflow-wrap: anywhere;
+}
+.field-suggest:empty {
+  display: none;
+}
+.field-suggest button {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-weight: var(--uq-font-weight-semibold);
+  color: var(--uq-link-fg);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.field-suggest button:hover {
+  color: var(--uq-link-fg-hover);
+  text-decoration-thickness: 2px;
 }
 /* Even columns, each wide enough for the longest option on one line: three
  * across on desktop, two on tablets, stacked on phones. */
